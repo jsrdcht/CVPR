@@ -27,5 +27,6 @@
 #                   output_names=["output"],  # 输出名
 #                   dynamic_axes={"input": {0: "batch_size"},  # 批处理变量
 #                                 "output": {0: "batch_size"}})
-a = [1,2,3]
-print(list(*(a)))
+import os
+for filename in os.listdir(os.path.join('./data', 'validation_images')):
+    print(filename)

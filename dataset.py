@@ -20,8 +20,10 @@ class MyDataset(torch.utils.data.Dataset):
 
         if self.mode == 'train':
             self.img_paths, self.labels = self.load_filenames(self.data_dir, self.mode)
-        else:
+        elif mode == 'test':
             self.img_paths, self.img_names = self.load_filenames(self.data_dir, self.mode)
+        elif mode == 'validation':
+            self.img_paths, self.labels = self.load_filenames(self.data_dir, self.mode)
 
     def load_filenames(self, data_dir, mode):
         if mode == 'train':
@@ -31,7 +33,7 @@ class MyDataset(torch.utils.data.Dataset):
             labels = [float(_.split()[-1]) for _ in data]
 
             return img_paths, labels
-        else:
+        elif mode == 'test':
             img_paths = []
             img_names = []
             for filename in os.listdir(os.path.join(data_dir, 'test_images')):
@@ -39,6 +41,15 @@ class MyDataset(torch.utils.data.Dataset):
                 img_names.append(filename)
 
             return img_paths, img_names
+        elif mode == 'validation':
+            img_paths = []
+            labels = []
+            for dirname in os.listdir(os.path.join(data_dir, 'validation_images')):
+                for filename in os.listdir(os.path.join(data_dir, 'validation_images', dirname)):
+                    img_paths.append(os.path.join(data_dir, 'validation_images', dirname, filename))
+                    labels.append(int(dirname))
+
+            return img_paths, labels
 
     def __getitem__(self, index):
         if self.mode == 'train':
@@ -55,7 +66,8 @@ class MyDataset(torch.utils.data.Dataset):
             if self.transform: img = transform_norm(image=img)["image"]
 
             return img, torch.tensor(label, dtype=torch.long)
-        else:
+
+        elif self.mode == 'test':
             img_path = self.img_paths[index]
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -63,6 +75,17 @@ class MyDataset(torch.utils.data.Dataset):
             if self.transform: img = self.transform(image=img)["image"]
 
             return img, self.img_names[index]
+
+        elif self.mode == 'validation':
+            img_path = self.img_paths[index]
+            img = cv2.imread(img_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+            label = self.labels[index]
+
+            if self.transform: img = self.transform(image=img)["image"]
+
+            return img, torch.tensor(label, dtype=torch.long)
 
     def __len__(self):
         return len(self.img_paths)

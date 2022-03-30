@@ -37,6 +37,9 @@ def main():
     trainset = MyDataset(data_dir='./data', mode='train', transform=transform_train)
     trainloader = data.DataLoader(trainset, batch_size=args['batch_size'], shuffle=True, num_workers=0)
 
+    validset = MyDataset(data_dir='./data', mode='validation', transform=transform_test)
+    validloader = data.DataLoader(validset, batch_size=2 * args['batch_size'], shuffle=True, num_workers=0)
+
     # Model
     model = load_model(model_name=args['model'], pretrained=False)
     best_acc = 0  # best test accuracy
@@ -51,15 +54,17 @@ def main():
     for epoch in range(args['epochs']):
 
         train_loss, train_acc = train(trainloader, model, optimizer, epoch=epoch)
-        print(args)
+        valid_loss, valid_acc = valid(validloader, model, epoch = epoch)
+
         print('acc: {}'.format(train_acc))
+        print('validation_loss: {}, validation_acc: {}'.format(valid_loss, valid_acc))
 
         # save model
-        best_acc = max(train_acc, best_acc)
+        best_acc = max(valid_acc, best_acc)
         save_checkpoint({
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
-            'acc': train_acc,
+            'acc': valid_acc,
             'best_acc': best_acc,
             'optimizer': optimizer.state_dict(),
         }, arch=args['model'] + str(best_acc))
@@ -83,7 +88,6 @@ def train(trainloader, model, optimizer, epoch):
         labels = labels.cuda()
         inputs = inputs.to('cuda', dtype=torch.float)
 
-
         outputs = model(inputs)
         loss = cross_entropy(outputs, labels)
         acc = accuracy(outputs, labels)
@@ -103,6 +107,30 @@ def train(trainloader, model, optimizer, epoch):
 
         bar.set_postfix(epoch=epoch, train_loss=losses.avg, train_acc=accs.avg,
                         lr=optimizer.state_dict()['param_groups'][0]['lr'])
+
+    return losses.avg, accs.avg
+
+
+@torch.no_grad()
+def valid(validloader, model, epoch):
+    losses = AverageMeter()
+    accs = AverageMeter()
+    model.eval()
+    # switch to train mode
+
+    bar = tqdm(enumerate(validloader), total=len(validloader))
+    for steps, (inputs, labels) in bar:
+        labels = labels.cuda()
+        inputs = inputs.to('cuda', dtype=torch.float)
+
+        outputs = model(inputs)
+        loss = cross_entropy(outputs, labels)
+        acc = accuracy(outputs, labels)
+
+        losses.update(loss.item(), inputs.size(0))
+        accs.update(acc[0].item(), inputs.size(0))
+
+        bar.set_postfix(epoch=epoch, valid_loss=losses.avg, valid_acc=accs.avg)
 
     return losses.avg, accs.avg
 

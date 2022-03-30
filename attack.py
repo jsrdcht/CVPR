@@ -1,1 +1,1 @@
-def attack(inputs,model,params):
+# def attack(inputs,model,params):
