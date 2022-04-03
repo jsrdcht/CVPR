@@ -35,7 +35,7 @@ def main():
     args = cfg
 
     trainset = MyDataset(data_dir='./data', mode='train', transform=transform_train)
-    trainloader = data.DataLoader(trainset, batch_size=args['batch_size'], shuffle=True, num_workers=0)
+    trainloader = data.DataLoader(trainset, batch_size=args['batch_size'], shuffle=False, num_workers=0)
 
     validset = MyDataset(data_dir='./data', mode='validation', transform=transform_test)
     validloader = data.DataLoader(validset, batch_size=2 * args['batch_size'], shuffle=True, num_workers=0)
@@ -54,7 +54,7 @@ def main():
     for epoch in range(args['epochs']):
 
         train_loss, train_acc = train(trainloader, model, optimizer, epoch=epoch)
-        valid_loss, valid_acc = valid(validloader, model, epoch = epoch)
+        valid_loss, valid_acc = valid(validloader, model, epoch=epoch)
 
         print('acc: {}'.format(train_acc))
         print('validation_loss: {}, validation_acc: {}'.format(valid_loss, valid_acc))
@@ -89,14 +89,14 @@ def train(trainloader, model, optimizer, epoch):
         inputs = inputs.to('cuda', dtype=torch.float)
 
         outputs = model(inputs)
-        loss = cross_entropy(outputs, labels)
+        loss = critirion(outputs, labels)
         acc = accuracy(outputs, labels)
 
         if cfg['attack']:
-            attacked_inputs = attack(inputs, model, params)
-            attacked_outputs = model(attacked_inputs)
-            attacked_loss = cross_entropy(attacked_outputs, labels)
-            loss += attacked_loss
+            for attack_algo in cfg['attack_algos']:
+                attack_loss, attack_accuracy = attack(inputs, model, labels, attack_algo=attack_algo)
+                print(attack_accuracy)
+                loss += attack_loss * cfg['attack_loss_ratio']
 
         optimizer.zero_grad()
         loss.backward()
@@ -124,7 +124,7 @@ def valid(validloader, model, epoch):
         inputs = inputs.to('cuda', dtype=torch.float)
 
         outputs = model(inputs)
-        loss = cross_entropy(outputs, labels)
+        loss = critirion(outputs, labels)
         acc = accuracy(outputs, labels)
 
         losses.update(loss.item(), inputs.size(0))

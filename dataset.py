@@ -132,10 +132,10 @@ transform_train = A.Compose([
     # weather aug
     A.OneOf([
         A.RandomRain(p=0.2),
-        A.RandomSnow(p=0.1),
+        A.RandomSnow(p=0.2),
         A.RandomShadow(p=0.1),
-        A.RandomFog(p=0.1),
-    ], p=0.2),
+        A.RandomFog(p=0.2),
+    ], p=0.3),
 
     # 畸变相关操作
     A.OneOf([
@@ -165,14 +165,17 @@ transform_train = A.Compose([
 ], p=1.)
 transform_norm = A.Compose([
     # 归一化
-    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1.0),
+    # A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1.0),
+    A.Normalize(mean=[0.47859862, 0.46757355, 0.39008468], std=[0.2554969, 0.2480743, 0.25745383], max_pixel_value=255.0, p=1.0),
+
     ToTensorV2()], p=1.0
 )
 
 transform_test = A.Compose([
     A.Resize(224, 224),
 
-    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], max_pixel_value=255.0, p=1.0),
+    A.Normalize(mean=[0.4689485, 0.45889792, 0.39056122], std=[0.24235739, 0.23714162, 0.2409292], max_pixel_value=255.0, p=1.0),
+
     ToTensorV2()], p=1.)
 
 # Data

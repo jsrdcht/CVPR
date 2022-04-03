@@ -57,5 +57,5 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def cross_entropy(outputs, labels):
+def critirion(outputs, labels):
     return nn.CrossEntropyLoss()(outputs, labels)

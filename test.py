@@ -27,6 +27,12 @@
 #                   output_names=["output"],  # 输出名
 #                   dynamic_axes={"input": {0: "batch_size"},  # 批处理变量
 #                                 "output": {0: "batch_size"}})
-import os
-for filename in os.listdir(os.path.join('./data', 'validation_images')):
-    print(filename)
+
+import numpy as np
+bounds = [[0.47859862, 0.46757355, 0.39008468], [0.2554969, 0.2480743, 0.25745383]]
+a = [1, 1, 1]
+
+bounds=np.array(bounds)
+a=np.array(a)
+
+print((a-bounds[0])/bounds[1])

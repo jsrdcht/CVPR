@@ -11,8 +11,12 @@ cfg = {
     'scheduler_hyperparameters': {
         'T_max': 30
     },
-    'batch_size': 16,
-    'attack': False,
+    'batch_size': 8,
+
+    'attack': True,
+    'attack_loss_ratio': 1,
+    'attack_algos': ['FGSM','PGD'],
+    'attack_range': [0.1, 0.3]
 }
 
 attack_param = {
