@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 import timm
 import torch.nn as nn
+import random
 
 
 def makedirs(path):
@@ -59,3 +60,11 @@ class AverageMeter(object):
 
 def critirion(outputs, labels):
     return nn.CrossEntropyLoss()(outputs, labels)
+
+
+def set_seed(seed: int):
+    seed = 11037
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True

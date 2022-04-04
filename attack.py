@@ -32,12 +32,6 @@ def PGD_attack(inputs, model, labels):
 
     return pgd_loss, attack_accuracy
 
-# C&W attack
-def CW_attack(inputs, model, labels):
-
-
-
-
 
 
 def FGSM_attack(inputs, model, labels):
